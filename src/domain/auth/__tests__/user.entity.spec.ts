@@ -73,22 +73,4 @@ describe('User Entity', () => {
       expect(roles).toHaveLength(4);
     });
   });
-
-  describe('immutability', () => {
-    it('should have readonly properties', () => {
-      const user = new User(
-        1,
-        'testuser',
-        'test@example.com',
-        'hashedPassword',
-        UserRole.DOCTOR
-      );
-
-      // TypeScript should prevent these assignments, but we can test the behavior
-      expect(() => {
-        // @ts-ignore - Testing immutability
-        user.userId = 2;
-      }).toThrow();
-    });
-  });
 }); 

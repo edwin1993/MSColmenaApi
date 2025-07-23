@@ -9,20 +9,28 @@ import {
   HttpException,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { MedicationService } from '../../application/medication/medication.service';
 import { CreateMedicationDto } from './medication.dto';
+import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
+import { RolesGuard } from '../../infrastructure/auth/roles.guard';
+import { Roles } from '../../infrastructure/auth/roles.decorator';
+import { UserRole } from '../../domain/auth/user.entity';
 
 @ApiTags('Medicamentos')
 @Controller('medications')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class MedicationController {
   constructor(private readonly medicationService: MedicationService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Crear un nuevo medicamento',
-    description: 'Registra un nuevo medicamento en el sistema. Valida que no exista un medicamento con el mismo nombre.'
+    description: 'Registra un nuevo medicamento en el sistema. Solo ADMIN y DOCTOR pueden crear medicamentos.'
   })
   @ApiResponse({ 
     status: 201, 
@@ -62,6 +70,7 @@ export class MedicationController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener todos los medicamentos',
     description: 'Retorna una lista de todos los medicamentos registrados en el sistema.'
@@ -87,6 +96,7 @@ export class MedicationController {
   }
 
   @Get(':medicationId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener un medicamento por ID',
     description: 'Busca un medicamento específico usando su ID interno.'
@@ -130,9 +140,10 @@ export class MedicationController {
   }
 
   @Put(':medicationId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Actualizar un medicamento',
-    description: 'Actualiza la información de un medicamento existente usando su ID interno.'
+    description: 'Actualiza la información de un medicamento existente. Solo ADMIN y DOCTOR pueden modificar medicamentos.'
   })
   @ApiParam({ 
     name: 'medicationId', 
@@ -158,9 +169,10 @@ export class MedicationController {
   }
 
   @Delete(':medicationId')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ 
     summary: 'Eliminar un medicamento',
-    description: 'Elimina permanentemente un medicamento del sistema usando su ID interno.'
+    description: 'Elimina permanentemente un medicamento del sistema. Solo ADMIN puede eliminar medicamentos.'
   })
   @ApiParam({ 
     name: 'medicationId', 

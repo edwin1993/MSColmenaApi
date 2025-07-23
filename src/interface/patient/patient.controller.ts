@@ -8,23 +8,33 @@ import {
   Param,
   HttpException,
   HttpStatus,
+  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { PatientService } from '../../application/patient/patient.service';
 import { CreatePatientDto } from './patient.dto';
+import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
+import { RolesGuard } from '../../infrastructure/auth/roles.guard';
+import { Roles } from '../../infrastructure/auth/roles.decorator';
+import { UserRole } from '../../domain/auth/user.entity';
 
 @ApiTags('Pacientes')
 @Controller('patients')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
+  @HttpCode(200)
   @ApiOperation({ 
     summary: 'Crear un nuevo paciente',
-    description: 'Registra un nuevo paciente en el sistema. Valida que no exista un paciente con la misma identificación o email.'
+    description: 'Registra un nuevo paciente en el sistema. Solo ADMIN y DOCTOR pueden crear pacientes.'
   })
   @ApiResponse({ 
-    status: 201, 
+    status: 200, 
     description: 'Paciente creado exitosamente',
     schema: {
       example: {
@@ -74,6 +84,7 @@ export class PatientController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Obtener todos los pacientes',
     description: 'Retorna una lista de todos los pacientes registrados en el sistema.'
@@ -101,6 +112,7 @@ export class PatientController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Obtener un paciente por identificación',
     description: 'Busca un paciente específico usando su número de identificación.'
@@ -146,9 +158,10 @@ export class PatientController {
   }
 
   @Put(':patientId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Actualizar un paciente',
-    description: 'Actualiza la información de un paciente existente usando su ID interno.'
+    description: 'Actualiza la información de un paciente existente. Solo ADMIN y DOCTOR pueden modificar pacientes.'
   })
   @ApiParam({ 
     name: 'patientId', 
@@ -176,9 +189,10 @@ export class PatientController {
   }
 
   @Delete(':patientId')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ 
     summary: 'Eliminar un paciente',
-    description: 'Elimina permanentemente un paciente del sistema usando su ID interno.'
+    description: 'Elimina permanentemente un paciente del sistema. Solo ADMIN puede eliminar pacientes.'
   })
   @ApiParam({ 
     name: 'patientId', 

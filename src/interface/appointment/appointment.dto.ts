@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsNumber, IsDateString, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { AppointmentStatus } from '../../domain/appointment/appointment.entity';
 
 export class CreateAppointmentDto {
@@ -46,6 +47,7 @@ export class SearchAppointmentsDto {
     required: false
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   patientId?: number;
 
@@ -55,6 +57,7 @@ export class SearchAppointmentsDto {
     required: false
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   doctorId?: number;
 

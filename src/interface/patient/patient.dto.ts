@@ -8,10 +8,10 @@ export class CreatePatientDto {
     minLength: 1,
     maxLength: 20
   })
-  @IsNotEmpty()
-  @IsString()
-  @Length(1, 20)
-  @Matches(/^\d+$/)
+  @IsNotEmpty({ message: 'La identificación es obligatoria' })
+  @IsString({ message: 'La identificación debe ser una cadena de texto' })
+  @Length(1, 20, { message: 'La identificación debe tener entre 1 y 20 caracteres' })
+  @Matches(/^\d+$/, { message: 'La identificación solo puede contener números' })
   id: string;
 
   @ApiProperty({ 

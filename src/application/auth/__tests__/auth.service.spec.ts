@@ -38,10 +38,13 @@ describe('AuthService', () => {
     delete: jest.fn(),
   };
 
-  const mockJwtService = {
+  const mockJwtService: jest.Mocked<JwtService> = {
     sign: jest.fn(),
+    signAsync: jest.fn(),
     verify: jest.fn(),
-  };
+    verifyAsync: jest.fn(),
+    decode: jest.fn(),
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -60,7 +63,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     userRepository = module.get('UserRepository');
-    jwtService = module.get<JwtService>(JwtService);
+    jwtService = module.get<JwtService>(JwtService) as jest.Mocked<JwtService>;
 
     // Reset mocks
     jest.clearAllMocks();
@@ -69,7 +72,7 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('should return user when credentials are valid', async () => {
       userRepository.findByUsername.mockResolvedValue(mockUser);
-      mockBcrypt.compare.mockResolvedValue(true as any);
+      mockBcrypt.compare.mockResolvedValue(true as unknown as never);
 
       const result = await service.validateUser('testuser', 'password');
 
@@ -107,7 +110,7 @@ describe('AuthService', () => {
 
     it('should return null when password is incorrect', async () => {
       userRepository.findByUsername.mockResolvedValue(mockUser);
-      mockBcrypt.compare.mockResolvedValue(false as any);
+      mockBcrypt.compare.mockResolvedValue(false as unknown as never);
 
       const result = await service.validateUser('testuser', 'wrongpassword');
 
@@ -120,7 +123,7 @@ describe('AuthService', () => {
     it('should return login response with token when credentials are valid', async () => {
       const mockToken = 'jwt-token';
       userRepository.findByUsername.mockResolvedValue(mockUser);
-      mockBcrypt.compare.mockResolvedValue(true as any);
+      mockBcrypt.compare.mockResolvedValue(true as unknown as never);
       jwtService.sign.mockReturnValue(mockToken);
 
       const result = await service.login('testuser', 'password');
@@ -165,7 +168,7 @@ describe('AuthService', () => {
     it('should create user successfully when data is valid', async () => {
       userRepository.findByUsername.mockResolvedValue(null);
       userRepository.findByEmail.mockResolvedValue(null);
-      mockBcrypt.hash.mockResolvedValue('hashedPassword' as any);
+      mockBcrypt.hash.mockResolvedValue('hashedPassword' as unknown as never);
       userRepository.create.mockResolvedValue(mockUser);
 
       const result = await service.register(registerData);

@@ -35,7 +35,7 @@ describe('Auth DTOs', () => {
 
       expect(errors).toHaveLength(1);
       expect(errors[0].property).toBe('password');
-      expect(errors[0].constraints).toHaveProperty('length');
+      expect(errors[0].constraints).toHaveProperty('isLength');
     });
 
     it('should fail validation when username is too long', async () => {
@@ -47,7 +47,7 @@ describe('Auth DTOs', () => {
 
       expect(errors).toHaveLength(1);
       expect(errors[0].property).toBe('username');
-      expect(errors[0].constraints).toHaveProperty('length');
+      expect(errors[0].constraints).toHaveProperty('isLength');
     });
 
     it('should fail validation when password is not a string', async () => {
@@ -115,7 +115,7 @@ describe('Auth DTOs', () => {
 
       expect(errors).toHaveLength(1);
       expect(errors[0].property).toBe('email');
-      expect(errors[0].constraints).toHaveProperty('length');
+      expect(errors[0].constraints).toHaveProperty('isLength');
     });
 
     it('should fail validation when role is invalid', async () => {

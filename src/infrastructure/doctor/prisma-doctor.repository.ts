@@ -106,12 +106,23 @@ export class PrismaDoctorRepository implements DoctorRepository {
   }
 
   async update(doctorId: number, doctor: Partial<Doctor>): Promise<Doctor> {
-    // Excluir doctorId del objeto data
-    const { doctorId: _, ...data } = doctor;
+    // Verificar que el doctor existe antes de actualizar
+    const existingDoctor = await this.prisma.doctor.findUnique({
+      where: { doctorId }
+    });
+    
+    if (!existingDoctor) {
+      throw new Error(`Doctor con ID ${doctorId} no encontrado`);
+    }
+
+    // Excluir doctorId del objeto data si existe
+    const { doctorId: _, ...data } = doctor as any;
+    
     const updated = await this.prisma.doctor.update({
       where: { doctorId },
       data,
     });
+    
     return new Doctor(
       updated.doctorId,
       updated.id,

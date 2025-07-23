@@ -42,6 +42,12 @@ describe('PrismaUserRepository', () => {
     repository = module.get<PrismaUserRepository>(PrismaUserRepository);
     mockPrisma = repository['prisma'] as jest.Mocked<PrismaClient>;
 
+    // Inicializa mockPrisma.user para evitar errores de undefined
+    Object.defineProperty(mockPrisma, 'user', {
+      value: {},
+      writable: true,
+    });
+
     // Reset mocks
     jest.clearAllMocks();
   });
@@ -60,7 +66,8 @@ describe('PrismaUserRepository', () => {
         null
       );
 
-      mockPrisma.user.create.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.create = jest.fn();
+      (mockPrisma.user.create as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       const result = await repository.create(newUser);
 
@@ -80,7 +87,8 @@ describe('PrismaUserRepository', () => {
 
   describe('findById', () => {
     it('should return user when found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       const result = await repository.findById(1);
 
@@ -91,7 +99,8 @@ describe('PrismaUserRepository', () => {
     });
 
     it('should return null when user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await repository.findById(999);
 
@@ -104,7 +113,8 @@ describe('PrismaUserRepository', () => {
 
   describe('findByUsername', () => {
     it('should return user when found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       const result = await repository.findByUsername('testuser');
 
@@ -115,7 +125,8 @@ describe('PrismaUserRepository', () => {
     });
 
     it('should return null when user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await repository.findByUsername('nonexistent');
 
@@ -128,7 +139,8 @@ describe('PrismaUserRepository', () => {
 
   describe('findByEmail', () => {
     it('should return user when found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       const result = await repository.findByEmail('test@example.com');
 
@@ -139,7 +151,8 @@ describe('PrismaUserRepository', () => {
     });
 
     it('should return null when user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await repository.findByEmail('nonexistent@example.com');
 
@@ -152,7 +165,8 @@ describe('PrismaUserRepository', () => {
 
   describe('findByDoctorId', () => {
     it('should return user when found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       const result = await repository.findByDoctorId(1);
 
@@ -163,7 +177,8 @@ describe('PrismaUserRepository', () => {
     });
 
     it('should return null when user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique = jest.fn();
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await repository.findByDoctorId(999);
 
@@ -186,7 +201,8 @@ describe('PrismaUserRepository', () => {
         },
       ];
 
-      mockPrisma.user.findMany.mockResolvedValue(mockPrismaUsers);
+      mockPrisma.user.findMany = jest.fn();
+      (mockPrisma.user.findMany as jest.Mock).mockResolvedValue(mockPrismaUsers);
 
       const result = await repository.findAll();
 
@@ -198,7 +214,8 @@ describe('PrismaUserRepository', () => {
     });
 
     it('should return empty array when no users exist', async () => {
-      mockPrisma.user.findMany.mockResolvedValue([]);
+      mockPrisma.user.findMany = jest.fn();
+      (mockPrisma.user.findMany as jest.Mock).mockResolvedValue([]);
 
       const result = await repository.findAll();
 
@@ -219,7 +236,8 @@ describe('PrismaUserRepository', () => {
         ...updateData,
       };
 
-      mockPrisma.user.update.mockResolvedValue(updatedPrismaUser);
+      mockPrisma.user.update = jest.fn();
+      (mockPrisma.user.update as jest.Mock).mockResolvedValue(updatedPrismaUser);
 
       const result = await repository.update(1, updateData);
 
@@ -239,7 +257,8 @@ describe('PrismaUserRepository', () => {
         updatedAt: new Date(), // Should be excluded
       };
 
-      mockPrisma.user.update.mockResolvedValue(mockPrismaUser);
+      mockPrisma.user.update = jest.fn();
+      (mockPrisma.user.update as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       await repository.update(1, updateData);
 
@@ -252,7 +271,9 @@ describe('PrismaUserRepository', () => {
 
   describe('delete', () => {
     it('should delete user successfully', async () => {
-      mockPrisma.user.delete.mockResolvedValue(mockPrismaUser);
+      // Aseguramos que sea un mock de Jest
+      mockPrisma.user.delete = jest.fn();
+      (mockPrisma.user.delete as jest.Mock).mockResolvedValue(mockPrismaUser);
 
       await repository.delete(1);
 

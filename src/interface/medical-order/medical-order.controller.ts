@@ -9,20 +9,28 @@ import {
   HttpException,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { MedicalOrderService } from '../../application/medical-order/medical-order.service';
 import { CreateMedicalOrderDto, AddMedicationDto, MedicalOrderWithMedicationsDto } from './medical-order.dto';
+import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
+import { RolesGuard } from '../../infrastructure/auth/roles.guard';
+import { Roles } from '../../infrastructure/auth/roles.decorator';
+import { UserRole } from '../../domain/auth/user.entity';
 
 @ApiTags('Órdenes Médicas')
 @Controller('medical-orders')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class MedicalOrderController {
   constructor(private readonly medicalOrderService: MedicalOrderService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Crear una nueva orden médica',
-    description: 'Crea una nueva orden médica y la adjunta a una cita específica.'
+    description: 'Crea una nueva orden médica. Solo ADMIN y DOCTOR pueden crear órdenes médicas.'
   })
   @ApiResponse({ 
     status: 201, 
@@ -54,6 +62,7 @@ export class MedicalOrderController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener todas las órdenes médicas',
     description: 'Retorna una lista de todas las órdenes médicas registradas en el sistema.'
@@ -80,6 +89,7 @@ export class MedicalOrderController {
   }
 
   @Get('appointment/:appointmentId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener órdenes médicas por cita',
     description: 'Retorna todas las órdenes médicas adjuntas a una cita específica.'
@@ -111,6 +121,7 @@ export class MedicalOrderController {
   }
 
   @Get(':medicalOrderId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener una orden médica por ID',
     description: 'Busca una orden médica específica usando su ID interno.'
@@ -155,6 +166,7 @@ export class MedicalOrderController {
   }
 
   @Get(':medicalOrderId/medications')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE)
   @ApiOperation({ 
     summary: 'Obtener medicamentos de una orden médica',
     description: 'Retorna la lista de IDs de medicamentos adjuntos a una orden médica específica.'
@@ -176,9 +188,10 @@ export class MedicalOrderController {
   }
 
   @Post(':medicalOrderId/medications')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Adjuntar medicamento a una orden médica',
-    description: 'Agrega un medicamento específico a una orden médica existente.'
+    description: 'Agrega un medicamento específico a una orden médica existente. Solo ADMIN y DOCTOR pueden adjuntar medicamentos.'
   })
   @ApiParam({ 
     name: 'medicalOrderId', 
@@ -221,9 +234,10 @@ export class MedicalOrderController {
   }
 
   @Delete(':medicalOrderId/medications/:medicationId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Remover medicamento de una orden médica',
-    description: 'Elimina un medicamento específico de una orden médica existente.'
+    description: 'Elimina un medicamento específico de una orden médica existente. Solo ADMIN y DOCTOR pueden remover medicamentos.'
   })
   @ApiParam({ 
     name: 'medicalOrderId', 
@@ -253,9 +267,10 @@ export class MedicalOrderController {
   }
 
   @Put(':medicalOrderId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Actualizar una orden médica',
-    description: 'Actualiza la información de una orden médica existente usando su ID interno.'
+    description: 'Actualiza la información de una orden médica existente. Solo ADMIN y DOCTOR pueden modificar órdenes médicas.'
   })
   @ApiParam({ 
     name: 'medicalOrderId', 
@@ -286,9 +301,10 @@ export class MedicalOrderController {
   }
 
   @Delete(':medicalOrderId')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ 
     summary: 'Eliminar una orden médica',
-    description: 'Elimina permanentemente una orden médica del sistema usando su ID interno.'
+    description: 'Elimina permanentemente una orden médica del sistema. Solo ADMIN puede eliminar órdenes médicas.'
   })
   @ApiParam({ 
     name: 'medicalOrderId', 

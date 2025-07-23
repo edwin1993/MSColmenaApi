@@ -81,5 +81,6 @@ export class RegisterDto {
     example: 1,
     required: false
   })
+  @IsOptional()
   doctorId?: number;
 } 

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Doctor } from '../../domain/doctor/doctor.entity';
 import { DoctorRepository } from '../../domain/doctor/doctor.repository';
 
@@ -35,10 +35,24 @@ export class DoctorService {
   }
 
   async update(doctorId: number, doctor: Partial<Doctor>): Promise<Doctor> {
-    return this.doctorRepository.update(doctorId, doctor);
+    try {
+      return await this.doctorRepository.update(doctorId, doctor);
+    } catch (error) {
+      if (error.message.includes('no encontrado')) {
+        throw new NotFoundException(`Doctor con ID ${doctorId} no encontrado`);
+      }
+      throw error;
+    }
   }
 
   async delete(doctorId: number): Promise<void> {
-    return this.doctorRepository.delete(doctorId);
+    try {
+      return await this.doctorRepository.delete(doctorId);
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Doctor con ID ${doctorId} no encontrado`);
+      }
+      throw error;
+    }
   }
 } 

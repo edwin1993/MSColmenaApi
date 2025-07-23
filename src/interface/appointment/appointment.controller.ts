@@ -10,21 +10,29 @@ import {
   HttpException,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AppointmentService } from '../../application/appointment/appointment.service';
 import { CreateAppointmentDto, UpdateAppointmentStatusDto, SearchAppointmentsDto } from './appointment.dto';
 import { AppointmentStatus } from '../../domain/appointment/appointment.entity';
+import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
+import { RolesGuard } from '../../infrastructure/auth/roles.guard';
+import { Roles } from '../../infrastructure/auth/roles.decorator';
+import { UserRole } from '../../domain/auth/user.entity';
 
 @ApiTags('Citas Médicas')
 @Controller('appointments')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Crear una nueva cita médica',
-    description: 'Registra una nueva cita médica. Valida que el médico esté disponible en la fecha y hora especificada.'
+    description: 'Registra una nueva cita médica. Solo ADMIN, DOCTOR y RECEPTIONIST pueden crear citas.'
   })
   @ApiResponse({ 
     status: 201, 
@@ -72,6 +80,7 @@ export class AppointmentController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Obtener citas médicas con filtros',
     description: 'Retorna una lista de citas médicas con opciones de filtrado por paciente, médico y rango de fechas.'
@@ -99,11 +108,15 @@ export class AppointmentController {
     }
   })
   async findAll(@Query() query: SearchAppointmentsDto) {
-    if (query.patientId) {
-      return this.appointmentService.findByPatientId(query.patientId);
+    // Transformar los parámetros de query a números si están presentes
+    const patientId = query.patientId ? Number(query.patientId) : undefined;
+    const doctorId = query.doctorId ? Number(query.doctorId) : undefined;
+    
+    if (patientId) {
+      return this.appointmentService.findByPatientId(patientId);
     }
-    if (query.doctorId) {
-      return this.appointmentService.findByDoctorId(query.doctorId);
+    if (doctorId) {
+      return this.appointmentService.findByDoctorId(doctorId);
     }
     if (query.startDate && query.endDate) {
       return this.appointmentService.findByDateRange(
@@ -115,6 +128,7 @@ export class AppointmentController {
   }
 
   @Get('available-doctors')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Obtener médicos disponibles por fecha',
     description: 'Retorna una lista de IDs de médicos que están disponibles en una fecha específica.'
@@ -137,6 +151,7 @@ export class AppointmentController {
   }
 
   @Get(':appointmentId')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE, UserRole.RECEPTIONIST)
   @ApiOperation({ 
     summary: 'Obtener una cita médica por ID',
     description: 'Busca una cita médica específica usando su ID interno.'
@@ -182,9 +197,10 @@ export class AppointmentController {
   }
 
   @Put(':appointmentId/status')
+  @Roles(UserRole.ADMIN, UserRole.DOCTOR)
   @ApiOperation({ 
     summary: 'Actualizar el estado de una cita médica',
-    description: 'Permite al médico cambiar el estado de la cita (ASISTIO, NO_ASISTIO).'
+    description: 'Permite al médico cambiar el estado de la cita. Solo ADMIN y DOCTOR pueden cambiar el estado.'
   })
   @ApiParam({ 
     name: 'appointmentId', 
@@ -215,9 +231,10 @@ export class AppointmentController {
   }
 
   @Delete(':appointmentId')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ 
     summary: 'Eliminar una cita médica',
-    description: 'Elimina permanentemente una cita médica del sistema.'
+    description: 'Elimina permanentemente una cita médica del sistema. Solo ADMIN puede eliminar citas.'
   })
   @ApiParam({ 
     name: 'appointmentId', 
