@@ -1,98 +1,367 @@
+# 🏥 MSColmenaAPI - Sistema de Gestión Médica
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <strong>Sistema de Gestión Médica construido con NestJS y Clean Architecture</strong>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 📋 Descripción
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+MSColmenaAPI es una API REST completa para la gestión de un sistema médico que incluye:
 
-## Project setup
+- **Gestión de Pacientes**: Registro y administración de información de pacientes
+- **Gestión de Doctores**: Control de médicos y especialistas
+- **Citas Médicas**: Programación y seguimiento de citas
+- **Órdenes Médicas**: Generación y gestión de órdenes médicas
+- **Medicamentos**: Control de inventario de medicamentos
+- **Autenticación**: Sistema de autenticación y autorización con JWT
 
-```bash
-$ npm install
+## 🏗️ Arquitectura
+
+El proyecto está construido siguiendo los principios de **Clean Architecture** con las siguientes capas:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Interface Layer                          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │ Controllers │ │    DTOs     │ │   Guards    │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                  Application Layer                          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │   Services  │ │ Use Cases   │ │ Validators  │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                   Domain Layer                              │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │  Entities   │ │Repositories │ │  Business   │           │
+│  │             │ │ Interfaces  │ │   Rules     │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                Infrastructure Layer                         │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │ Repositories│ │   Database  │ │   External  │           │
+│  │Implement.   │ │   (Prisma)  │ │   Services  │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Compile and run the project
+### 📁 Estructura del Proyecto
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+src/
+├── domain/                    # Capa de Dominio
+│   ├── patient/              # Entidades y repositorios de pacientes
+│   ├── doctor/               # Entidades y repositorios de doctores
+│   ├── appointment/          # Entidades y repositorios de citas
+│   ├── medical-order/        # Entidades y repositorios de órdenes médicas
+│   ├── medication/           # Entidades y repositorios de medicamentos
+│   └── auth/                 # Entidades y repositorios de autenticación
+├── application/              # Capa de Aplicación
+│   ├── patient/              # Servicios de aplicación para pacientes
+│   ├── doctor/               # Servicios de aplicación para doctores
+│   ├── appointment/          # Servicios de aplicación para citas
+│   ├── medical-order/        # Servicios de aplicación para órdenes médicas
+│   ├── medication/           # Servicios de aplicación para medicamentos
+│   └── auth/                 # Servicios de aplicación para autenticación
+├── infrastructure/           # Capa de Infraestructura
+│   ├── patient/              # Implementaciones de repositorios
+│   ├── doctor/               # Implementaciones de repositorios
+│   ├── appointment/          # Implementaciones de repositorios
+│   ├── medical-order/        # Implementaciones de repositorios
+│   ├── medication/           # Implementaciones de repositorios
+│   └── auth/                 # Implementaciones de repositorios
+└── interface/                # Capa de Interfaz
+    ├── patient/              # Controladores y DTOs
+    ├── doctor/               # Controladores y DTOs
+    ├── appointment/          # Controladores y DTOs
+    ├── medical-order/        # Controladores y DTOs
+    ├── medication/           # Controladores y DTOs
+    └── auth/                 # Controladores y DTOs
 ```
 
-## Run tests
+## 🚀 Tecnologías Utilizadas
 
+- **Framework**: [NestJS](https://nestjs.com/) - Framework progresivo de Node.js
+- **Base de Datos**: [MySQL](https://www.mysql.com/) con [Prisma ORM](https://www.prisma.io/)
+- **Autenticación**: [JWT](https://jwt.io/) (JSON Web Tokens)
+- **Validación**: [class-validator](https://github.com/typestack/class-validator)
+- **Documentación**: [Swagger/OpenAPI](https://swagger.io/)
+- **Testing**: [Jest](https://jestjs.io/) para pruebas unitarias y e2e
+- **Linting**: [ESLint](https://eslint.org/) con configuración de NestJS
+
+## 📦 Instalación
+
+### Prerrequisitos
+
+- Node.js (versión 18 o superior)
+- MySQL (versión 8.0 o superior)
+- npm o yarn
+
+### Pasos de Instalación
+
+1. **Clonar el repositorio**
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <url-del-repositorio>
+cd MSColmenaAPI
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+2. **Instalar dependencias**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. **Configurar variables de entorno**
+```bash
+# Crear archivo .env basado en .env.example
+cp .env.example .env
+```
 
-## Resources
+Editar el archivo `.env` con tus configuraciones:
+```env
+# Database
+DATABASE_URL="mysql://usuario:password@localhost:3306/mscolmena"
 
-Check out a few resources that may come in handy when working with NestJS:
+# JWT
+JWT_SECRET="tu-jwt-secret-super-seguro"
+JWT_EXPIRES_IN="24h"
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Application
+PORT=3000
+NODE_ENV=development
+```
 
-## Support
+4. **Configurar la base de datos**
+```bash
+# Generar el cliente de Prisma
+npx prisma generate
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Ejecutar migraciones
+npx prisma migrate dev
 
-## Stay in touch
+# (Opcional) Poblar la base de datos con datos de prueba
+npx prisma db seed
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+5. **Ejecutar la aplicación**
+```bash
+# Desarrollo
+npm run start:dev
 
-## License
+# Producción
+npm run start:prod
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🧪 Testing
+
+```bash
+# Pruebas unitarias
+npm run test
+
+# Pruebas e2e
+npm run test:e2e
+
+# Cobertura de pruebas
+npm run test:cov
+
+# Pruebas en modo watch
+npm run test:watch
+```
+
+## 📚 Documentación de la API
+
+Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva de la API en:
+
+- **Swagger UI**: http://localhost:3000/api
+- **ReDoc**: http://localhost:3000/api-json
+
+### Endpoints Principales
+
+#### 🔐 Autenticación
+- `POST /auth/login` - Iniciar sesión
+- `POST /auth/register` - Registrar usuario
+- `GET /auth/profile` - Obtener perfil del usuario
+
+#### 👥 Pacientes
+- `GET /patients` - Obtener todos los pacientes
+- `POST /patients` - Crear nuevo paciente
+- `GET /patients/:id` - Obtener paciente por ID
+- `PUT /patients/:patientId` - Actualizar paciente
+- `DELETE /patients/:patientId` - Eliminar paciente
+
+#### 👨‍⚕️ Doctores
+- `GET /doctors` - Obtener todos los doctores
+- `POST /doctors` - Crear nuevo doctor
+- `GET /doctors/:id` - Obtener doctor por ID
+- `PUT /doctors/:doctorId` - Actualizar doctor
+- `DELETE /doctors/:doctorId` - Eliminar doctor
+
+#### 📅 Citas
+- `GET /appointments` - Obtener todas las citas
+- `POST /appointments` - Crear nueva cita
+- `GET /appointments/:id` - Obtener cita por ID
+- `PUT /appointments/:appointmentId` - Actualizar cita
+- `DELETE /appointments/:appointmentId` - Eliminar cita
+
+#### 📋 Órdenes Médicas
+- `GET /medical-orders` - Obtener todas las órdenes médicas
+- `POST /medical-orders` - Crear nueva orden médica
+- `GET /medical-orders/:id` - Obtener orden médica por ID
+- `PUT /medical-orders/:orderId` - Actualizar orden médica
+- `DELETE /medical-orders/:orderId` - Eliminar orden médica
+
+#### 💊 Medicamentos
+- `GET /medications` - Obtener todos los medicamentos
+- `POST /medications` - Crear nuevo medicamento
+- `GET /medications/:id` - Obtener medicamento por ID
+- `PUT /medications/:medicationId` - Actualizar medicamento
+- `DELETE /medications/:medicationId` - Eliminar medicamento
+
+## 🔧 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run start:dev          # Ejecutar en modo desarrollo con hot reload
+npm run start:debug        # Ejecutar en modo debug
+npm run start:prod         # Ejecutar en modo producción
+
+# Testing
+npm run test               # Ejecutar pruebas unitarias
+npm run test:watch         # Ejecutar pruebas en modo watch
+npm run test:cov           # Ejecutar pruebas con cobertura
+npm run test:debug         # Ejecutar pruebas en modo debug
+npm run test:e2e           # Ejecutar pruebas end-to-end
+
+# Base de datos
+npm run prisma:generate    # Generar cliente de Prisma
+npm run prisma:migrate     # Ejecutar migraciones
+npm run prisma:studio      # Abrir Prisma Studio
+npm run db:seed            # Poblar base de datos
+
+# Linting y formateo
+npm run lint               # Ejecutar ESLint
+npm run lint:fix           # Corregir errores de ESLint automáticamente
+npm run format             # Formatear código con Prettier
+```
+
+## 🗄️ Base de Datos
+
+El proyecto utiliza MySQL con Prisma ORM. El esquema de la base de datos incluye las siguientes entidades principales:
+
+- **Users**: Usuarios del sistema con roles
+- **Patients**: Información de pacientes
+- **Doctors**: Información de médicos
+- **Appointments**: Citas médicas
+- **MedicalOrders**: Órdenes médicas
+- **Medications**: Medicamentos disponibles
+
+### Migraciones
+
+```bash
+# Crear nueva migración
+npx prisma migrate dev --name nombre_migracion
+
+# Aplicar migraciones en producción
+npx prisma migrate deploy
+
+# Resetear base de datos (solo desarrollo)
+npx prisma migrate reset
+```
+
+## 🔐 Autenticación y Autorización
+
+El sistema utiliza JWT para la autenticación y implementa un sistema de roles:
+
+- **ADMIN**: Acceso completo a todas las funcionalidades
+- **DOCTOR**: Acceso a gestión de pacientes, citas y órdenes médicas
+- **NURSE**: Acceso limitado a ciertas funcionalidades
+- **RECEPTIONIST**: Acceso básico para registro de pacientes
+
+### Uso de Guards
+
+```typescript
+// Proteger ruta con autenticación
+@UseGuards(JwtAuthGuard)
+@Get('profile')
+getProfile(@Request() req) {
+  return req.user;
+}
+
+// Proteger ruta con roles específicos
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN', 'DOCTOR')
+@Get('patients')
+getPatients() {
+  return this.patientService.findAll();
+}
+```
+
+## 🚀 Despliegue
+
+### Variables de Entorno de Producción
+
+```env
+NODE_ENV=production
+PORT=3000
+DATABASE_URL="mysql://usuario:password@host:puerto/base_datos"
+JWT_SECRET="jwt-secret-super-seguro-y-largo"
+JWT_EXPIRES_IN="24h"
+```
+
+### Docker (Opcional)
+
+```bash
+# Construir imagen
+docker build -t mscolmena-api .
+
+# Ejecutar contenedor
+docker run -p 3000:3000 mscolmena-api
+```
+
+## 📝 Convenciones de Código
+
+### Commits
+
+El proyecto sigue las convenciones de [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` Nuevas características
+- `fix:` Correcciones de bugs
+- `docs:` Documentación
+- `style:` Cambios de formato
+- `refactor:` Refactorización de código
+- `test:` Pruebas
+- `chore:` Tareas de mantenimiento
+
+### Estructura de Commits por Módulo
+
+Cada módulo se commitea por separado siguiendo la Clean Architecture:
+
+```
+feat: implementar módulo [Nombre] con Clean Architecture
+- Domain: entidad [Nombre] y repositorio
+- Application: servicio de aplicación
+- Infrastructure: implementación Prisma
+- Interface: controlador y DTOs
+```
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+
+## 👥 Autores
+
+- **Edwin Fernando Avila Coronado** - *Desarrollo inicial* - [edwin1993](https://github.com/edwin1993)
