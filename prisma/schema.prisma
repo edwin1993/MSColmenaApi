@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  patientId   Int     @id @default(autoincrement()) // Identificador único generado automáticamente
+  id          String  @unique @db.VarChar(20)       // Identificación del paciente, solo números
+  firstName   String  @db.VarChar(90)
+  lastName    String  @db.VarChar(90)
+  email       String  @unique @db.VarChar(200)
+  phone       String  @db.VarChar(20)
+  address     String  @db.VarChar(200)
+  city        String  @db.VarChar(90)
+
+  // Relaciones
+  appointments Appointment[]
+}
+
+model Doctor {
+  doctorId        Int      @id @default(autoincrement())
+  id              String   @unique @db.VarChar(20)
+  firstName       String   @db.VarChar(90)
+  lastName        String   @db.VarChar(90)
+  email           String   @unique @db.VarChar(200)
+  phone           String   @db.VarChar(20)
+  address         String   @db.VarChar(200)
+  city            String   @db.VarChar(90)
+  professionalCard String  @unique @db.VarChar(50)
+  admissionDate   DateTime
+
+  // Relaciones
+  appointments Appointment[]
+  user         User?
+}
+
+enum AppointmentStatus {
+  PROGRAMADA
+  ASISTIO
+  NO_ASISTIO
+}
+
+model Appointment {
+  appointmentId    Int              @id @default(autoincrement())
+  doctorId         Int
+  patientId        Int
+  appointmentDate  DateTime
+  status           AppointmentStatus @default(PROGRAMADA)
+  statusUpdateDate DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relaciones
+  doctor           Doctor           @relation(fields: [doctorId], references: [doctorId])
+  patient          Patient          @relation(fields: [patientId], references: [patientId])
+  medicalOrders    MedicalOrder[]
+
+  @@unique([doctorId, appointmentDate])
+}
+
+model MedicalOrder {
+  medicalOrderId    Int      @id @default(autoincrement())
+  appointmentId     Int
+  description       String   @db.Text
+  expirationDate    DateTime
+  specialty         String   @db.VarChar(100)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  appointment       Appointment @relation(fields: [appointmentId], references: [appointmentId])
+  medications       MedicalOrderMedication[]
+}
+
+model Medication {
+  medicationId      Int      @id @default(autoincrement())
+  name              String   @unique @db.VarChar(200)
+  description       String   @db.Text
+  prescribedFor     String   @db.Text // Enfermedades por las que se prescribe
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  medicalOrders     MedicalOrderMedication[]
+}
+
+model MedicalOrderMedication {
+  medicalOrderId    Int
+  medicationId      Int
+
+  // Relaciones
+  medicalOrder      MedicalOrder @relation(fields: [medicalOrderId], references: [medicalOrderId])
+  medication        Medication   @relation(fields: [medicationId], references: [medicationId])
+
+  @@id([medicalOrderId, medicationId])
+}
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+}
+
+model User {
+  userId    Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  email     String   @unique @db.VarChar(200)
+  password  String   @db.VarChar(255)
+  role      UserRole
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones opcionales con entidades existentes
+  doctorId  Int?     @unique
+  doctor    Doctor? @relation(fields: [doctorId], references: [doctorId])
+}
