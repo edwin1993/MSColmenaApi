@@ -181,7 +181,7 @@ npm run test:watch
 
 Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva de la API en:
 
-- **Swagger UI**: http://localhost:3000/api
+- **Swagger UI**: http://localhost:3000/api-docs
 - **ReDoc**: http://localhost:3000/api-json
 
 ### Endpoints Principales
@@ -317,14 +317,80 @@ JWT_SECRET="jwt-secret-super-seguro-y-largo"
 JWT_EXPIRES_IN="24h"
 ```
 
-### Docker (Opcional)
+### Docker
+
+El proyecto incluye configuración completa de Docker para desarrollo y producción.
+
+#### 🐳 Desarrollo con Docker
 
 ```bash
-# Construir imagen
-docker build -t mscolmena-api .
+# Iniciar entorno de desarrollo completo
+docker-compose up -d
 
-# Ejecutar contenedor
-docker run -p 3000:3000 mscolmena-api
+# O usar el script de PowerShell (Windows)
+.\scripts\docker-dev.ps1 start
+
+# O usar el script de Bash (Linux/Mac)
+./scripts/docker-dev.sh start
+```
+
+**Servicios disponibles:**
+- 🌐 **API**: http://localhost:3000
+- 🗄️ **phpMyAdmin**: http://localhost:8080
+- 📚 **Documentación**: http://localhost:3000/api-docs
+
+#### 🚀 Producción con Docker
+
+```bash
+# Copiar archivo de variables de entorno
+cp env.production.example .env.production
+
+# Editar variables de entorno
+nano .env.production
+
+# Iniciar en producción
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+#### 📋 Comandos útiles
+
+```bash
+# Ver logs
+docker-compose logs -f
+
+# Ejecutar migraciones
+docker-compose exec api npx prisma migrate deploy
+
+# Resetear base de datos
+docker-compose exec api npx prisma migrate reset --force
+
+# Abrir shell en el contenedor
+docker-compose exec api sh
+
+# Detener servicios
+docker-compose down
+```
+
+#### 🔧 Scripts de desarrollo
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\docker-dev.ps1 start    # Iniciar
+.\scripts\docker-dev.ps1 stop     # Detener
+.\scripts\docker-dev.ps1 restart  # Reiniciar
+.\scripts\docker-dev.ps1 logs     # Ver logs
+.\scripts\docker-dev.ps1 build    # Construir
+.\scripts\docker-dev.ps1 clean    # Limpiar
+```
+
+**Linux/Mac (Bash):**
+```bash
+./scripts/docker-dev.sh start     # Iniciar
+./scripts/docker-dev.sh stop      # Detener
+./scripts/docker-dev.sh restart   # Reiniciar
+./scripts/docker-dev.sh logs      # Ver logs
+./scripts/docker-dev.sh build     # Construir
+./scripts/docker-dev.sh clean     # Limpiar
 ```
 
 ## 📝 Convenciones de Código

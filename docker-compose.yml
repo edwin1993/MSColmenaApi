@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mscolmena-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mscolmena
+      MYSQL_USER: mscolmena_user
+      MYSQL_PASSWORD: mscolmena_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mscolmena-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Aplicación NestJS
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: mscolmena-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: mysql://mscolmena_user:mscolmena_password@mysql:3306/mscolmena
+      JWT_SECRET: your-super-secret-jwt-key-for-development
+      JWT_EXPIRES_IN: 24h
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - mscolmena-network
+    command: npm run start:dev
+
+  # phpMyAdmin (opcional, para gestión de base de datos)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: mscolmena-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: mscolmena_user
+      PMA_PASSWORD: mscolmena_password
+    depends_on:
+      - mysql
+    networks:
+      - mscolmena-network
+
+volumes:
+  mysql_data:
+
+networks:
+  mscolmena-network:
+    driver: bridge 
